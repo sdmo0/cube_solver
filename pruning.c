@@ -262,8 +262,12 @@ if (snP->move ==-1)//no more possible move, go to left node
 {
 	if (r_depth==manLength)
 	{
+/**** original code
 		printf("depth %2u completed, %14"PRIu64" nodes",manLength,nodes);
 		printf(", %14"PRIu64" tests\n",tests);
+*/
+		printf("depth %2u completed, %14llu nodes",manLength,nodes);
+		printf(", %14llu tests\n",tests);
 		fflush(stdout);
 		r_depth +=2;
 		manLength = r_depth;

@@ -1,5 +1,5 @@
-prog: coordcube.o cubiecube.o optiqtm.o pruning.o symmetry.o
-	gcc coordcube.o cubiecube.o optiqtm.o pruning.o symmetry.o -o optiqtm
+prog: coordcube.o cubiecube.o optiqtm.o pruning.o symmetry.o cube_input.o
+	gcc coordcube.o cubiecube.o optiqtm.o pruning.o symmetry.o cube_input.o -o optiqtm
 
 coordcube.o : coordcube.c
 	gcc -O3 -Wall -c coordcube.c
@@ -15,4 +15,7 @@ pruning.o : pruning.c
 
 symmetry.o : symmetry.c
 	gcc -O3 -Wall -c symmetry.c
+
+cube_input.o : cube_input.c
+	gcc -O3 -Wall -c cube_input.c
 

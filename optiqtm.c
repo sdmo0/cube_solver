@@ -12,7 +12,9 @@
 #include  <signal.h>
 #include "cubedefs.h"
 
-static char manString[256];
+#define MAX_STR 256
+
+char manString[MAX_STR];
 int subOptLev;
 int symRed;
 
@@ -22,6 +24,7 @@ static sigjmp_buf jump_buf;
 
 CubieCube cc_a;
 
+int input_cube(char *str, int n);
 
 #ifdef _LINUX_ 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -93,9 +96,14 @@ printf("\r\n");
 
 while (1)
 {
-	printf("enter cube (x to exit): ");fflush(stdout);
+
+/**** original code ****
 	if (fgets(manString,sizeof(manString),stdin)==NULL) break;
 	if (manString[0]=='x') exit(EXIT_SUCCESS);
+*/
+
+    input_cube(manString, MAX_STR);
+    
 	l=strlen(manString);
 	if (manString[l-1]=='\n') manString[l-1]=0;//remove LF
 	if (l>1 && manString[l-2]=='\r') manString[l-2]=0;//remove CR if present
