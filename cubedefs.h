@@ -348,7 +348,7 @@ void initMoveBitsConjugate();
 int distanceToTarget(CoordCube co);
 //computes the distance of the cube in QTM to the target subgroup.
 
-void solveOptimal(CubieCube cu);
+void solveOptimal(CubieCube cu, int sockfd);
 //The most important routine of the program.
 //Checks all maneuvers with increasing length which transform the cube to the
 //target group. Uses the movesCloserToTarget pruningtable in three different

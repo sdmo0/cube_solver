@@ -3,7 +3,7 @@
 #include <string.h>
 
 // UF UR UB UL DF DR DB DL FR FL BR BL UFR URB UBL ULF DRF DFL DLB DBR
-// WR WB WM WG YR YB YM YG RB RG MB MG WRB WBM WMG WGR YBR YRG YGM YMB
+// WR WB WO WG YR YB YO YG RB RG OB OG WRB WBO WOG WGR YBR YRG YGO YOB
 
 // A=0, B=1, C=2, D=3, E=4, F=5, G=6, H=7, I=8, J=9, K=10,
 // L=11, M=12, N=13, O=14, P=15, Q=16, R=17, S=18, T=19, U=20,
@@ -12,17 +12,17 @@
 // Up = White
 // Down = Yellow
 // Front = Red
-// Back = Magenta
+// Back = Orange
 // Left = Green
 // Right = Blue
 
 // color to face
 char map[30] = {0, 'R', 2, 3, 4, 5, 'L', 7, 8, 9, 10,
-                11, 'B', 13, 14, 15, 16, 'F', 18, 19, 20,
+                11, 12, 13, 'B', 15, 16, 'F', 18, 19, 20,
                 21, 'U', 23, 'D', 25, 0};
 
 // face to color
-char f2c_map[30] = {0, 'M', 2, 'Y', 4, 'R', 6, 7, 8, 9, 10,
+char f2c_map[30] = {0, 'O', 2, 'Y', 4, 'R', 6, 7, 8, 9, 10,
                 'G', 12, 13, 14, 15, 16, 'B', 18, 19, 'W',
                 21, 22, 23, 24, 25, 0};
 
@@ -37,9 +37,9 @@ char down[3][5] = {{'Y', 'Y', 'Y'},
 char front[3][5] = {{'R', 'R', 'R'},
                     {'R', 'R', 'R'},
                     {'R', 'R', 'R'}};
-char back[3][5] = {{'M', 'M', 'M'},
-                   {'M', 'M', 'M'},
-                   {'M', 'M', 'M'}};
+char back[3][5] = {{'O', 'O', 'O'},
+                   {'O', 'O', 'O'},
+                   {'O', 'O', 'O'}};
 char left[3][5] = {{'G', 'G', 'G'},
                    {'G', 'G', 'G'},
                    {'G', 'G', 'G'}};
@@ -85,7 +85,26 @@ void print_faces(void)
     for (i = 0; i < 3; i++)
         printf("      %c%c%c\n", down[i][0], down[i][1], down[i][2]);
     
-    printf("\n");
+    printf("=====================================================\n");
+
+    int numColor[30] = {0, };
+    int j;
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 3; j++) {
+            numColor[up[i][j]-'A']++;
+            numColor[front[i][j]-'A']++;
+            numColor[left[i][j]-'A']++;
+            numColor[right[i][j]-'A']++;
+            numColor[back[i][j]-'A']++;
+            numColor[down[i][j]-'A']++;
+        }
+    }
+
+    printf("White = %d, Red = %d, Green = %d,\n"
+           "Blue = %d, Orange = %d, Yellow = %d\n",
+           numColor['W'-'A'], numColor['R'-'A'], numColor['G'-'A'],
+           numColor['B'-'A'], numColor['O'-'A'], numColor['Y'-'A']);
+    printf("=====================================================\n");
 }
 
 void print_menu(int status) 
@@ -95,9 +114,10 @@ void print_menu(int status)
     printf("u(WHITE) : input UP => %c\n", CHECK_STATE(status, UP));
     printf("d(YELLOW) : input DOWN => %c\n", CHECK_STATE(status, DOWN));
     printf("f(RED) : input FRONT => %c\n", CHECK_STATE(status, FRONT));
-    printf("b(MAGENTA) : input BACK => %c\n", CHECK_STATE(status, BACK));
+    printf("b(ORANGE) : input BACK => %c\n", CHECK_STATE(status, BACK));
     printf("l(GREEN) : input LEFT => %c\n", CHECK_STATE(status, LEFT));
     printf("r(BLUE) : input RIGHT => %c\n", CHECK_STATE(status, RIGHT));
+    printf("m(enu) : print menu\n");
     printf("a : analyze\n");
     printf("x : exit\n");
 }
@@ -126,7 +146,7 @@ void input_face(int face)
         printf("** FRONT (red) **\n");
         break;
     case BACK:
-        printf("** BACK (magenta) **\n");
+        printf("** BACK (orange) **\n");
         break;
     case LEFT:
         printf("** LEFT (green) **\n");
@@ -236,6 +256,7 @@ int input_cube(char *str, int n)
             else if (ch == 'b' || ch == 'B') face = BACK;
             else if (ch == 'l' || ch == 'L') face = LEFT;
             else if (ch == 'r' || ch == 'R') face = RIGHT;
+            else if (ch == 'm' || ch == 'M') {print_menu(status); continue;}
             else if (ch == 'a' || ch == 'A') request_analyze = 1;
             else if (ch == 'x' || ch == 'X') exit(0);
             else continue;
