@@ -24,6 +24,16 @@
 #define SERVER "192.168.123.9"
 #define PORT_NO 51717
 
+#ifndef TRUE
+#define TRUE 1
+#endif
+
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+int must_connect = FALSE;
+
 char manString[MAX_STR];
 int subOptLev;
 int symRed;
@@ -39,7 +49,7 @@ int input_cube(char *str, int n);
 void error(const char *msg)
 {
     perror(msg);
-    exit(0);
+    if (must_connect) exit(0);
 }
 
 int connect_control_server(void)
@@ -56,7 +66,7 @@ int connect_control_server(void)
     
     if (server == NULL) {
         fprintf(stderr,"ERROR, no such host\n");
-        exit(0);
+        if (must_connect) exit(0);
     }
     
     bzero((char *) &serv_addr, sizeof(serv_addr));
@@ -68,7 +78,7 @@ int connect_control_server(void)
     
     if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) {
         error("ERROR connecting");
-        exit(0);
+        if (must_connect) exit(0);
     }
     
     return sockfd;        
@@ -110,14 +120,16 @@ int main(int argc, char * argv[])
         {
             subOptLev=0;
             if  (argv[i][1]>'0' && argv[i][1]<='9') subOptLev= argv[i][1]-48;
-        }
-        if (argv[i][0]=='-')
-        {
+            
+        } else if (argv[i][0]=='-') {
             if (argv[i][1]=='s') symRed=0;
+            else if (argv[i][1] == 'c') must_connect = TRUE;
+            
         }
     }
 
-    int sockfd = connect_control_server();
+    int sockfd = -1;
+    if (must_connect) sockfd = connect_control_server();
 
     printf("initializing memory.\n");
     visitedA = (char *)calloc(NGOAL/8+1,1);//initialized to 0 by default

@@ -11,6 +11,8 @@
 extern int subOptLev;
 extern int symRed;
 
+extern int must_connect;
+
 //movesDefault[m] gives the moves which are allowed after move m by default.
 //Each entry is a 12-bit array with the bit m* set if move m* is allowed
 //after move m.
@@ -313,8 +315,11 @@ MOVE:
                 printf("%s ", mv[sn[b].move]);
                 idx += snprintf(buffer + idx, 256 - idx, "%s ", mv[sn[b].move]);
             }
-            int n = write(sockfd, buffer, strlen(buffer));
-            if (n < 0) error("ERROR writing to socket");
+            int n = 0;
+            if (must_connect && sockfd > 0) {
+                n = write(sockfd, buffer, strlen(buffer));
+                if (n < 0) error("ERROR writing to socket");
+            }
             printf(" (%uq*)\n",manLength);
             if (subOptLev==-1 ){printf("\n");return;}
         }
