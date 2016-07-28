@@ -44,7 +44,7 @@ static sigjmp_buf jump_buf;
 
 CubieCube cc_a;
 
-int input_cube(char *str, int n);
+int input_cube(int sockfd, char *str, int n);
 
 void error(const char *msg)
 {
@@ -80,7 +80,8 @@ int connect_control_server(void)
         error("ERROR connecting");
         if (must_connect) exit(0);
     }
-    
+
+    printf("Success: Connecting to %s\n", SERVER);
     return sockfd;        
 }
 
@@ -165,7 +166,7 @@ int main(int argc, char * argv[])
       if (manString[0]=='x') exit(EXIT_SUCCESS);
 */
 
-        input_cube(manString, MAX_STR);
+        input_cube(sockfd, manString, MAX_STR);
 
         time_t start_time = time(NULL);
     

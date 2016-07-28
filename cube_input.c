@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+#include <unistd.h>
 
 // UF UR UB UL DF DR DB DL FR FL BR BL UFR URB UBL ULF DRF DFL DLB DBR
 // WR WB WO WG YR YB YO YG RB RG OB OG WRB WBO WOG WGR YBR YRG YGO YOB
@@ -119,7 +121,9 @@ void print_menu(int status)
     printf("r(BLUE) : input RIGHT => %c\n", CHECK_STATE(status, RIGHT));
     printf("m(enu) : print menu\n");
     printf("a : analyze\n");
-    printf("x : exit\n");
+    printf("x : mix the cube\n");
+    printf("t : motor test\n");
+    printf("q : exit\n");
 }
 
 void copy_arr(char d[3][5], char s[3][5])
@@ -235,7 +239,29 @@ void init(void)
     status = 0;
 }
 
-int input_cube(char *str, int n)
+#define MAX_M 100
+void mixing(int sockfd)
+{
+    char FACE[6] = {'U', 'L', 'F', 'R', 'B', 'D'};
+    char buf[256];
+    int i;
+    srand(time(NULL));
+
+    int rotate;
+    for (i = 0; i < MAX_M; i++) {
+        rotate = rand() % 6;
+        buf[i++] = FACE[rotate];
+        rotate = rand();
+        if (rotate & 0x1) buf[i++] = '\'';
+        buf[i] = ' ';
+    }
+    buf[MAX_M] = 0;
+
+    int n = write(sockfd, buf, MAX_M);
+    if (n < 0) printf("ERROR writing(%s)\n", buf);
+}
+
+int input_cube(int sockfd, char *str, int n)
 {
     init();
     while (1) {
@@ -258,7 +284,23 @@ int input_cube(char *str, int n)
             else if (ch == 'r' || ch == 'R') face = RIGHT;
             else if (ch == 'm' || ch == 'M') {print_menu(status); continue;}
             else if (ch == 'a' || ch == 'A') request_analyze = 1;
-            else if (ch == 'x' || ch == 'X') exit(0);
+            else if (ch == 'x' || ch == 'X') {
+                if (sockfd > 0) mixing(sockfd);
+                else printf("Not connected to Raspberry Pi\n");
+                
+            } else if (ch == 't' || ch == 'T') {
+                printf("input movements such as <R U F' D ...>\n");
+                char buf[256];
+                scanf("%*[ \n\t\r]");
+                fgets(buf, 256, stdin);
+                if (sockfd > 0) {
+                    int n = write(sockfd, buf, strlen(buf));
+                    if (n < 0) printf("ERROR writing %s\n", buf);
+                } else {
+                    printf("ERROR invalid sockfd\n");
+                }
+                
+            } else if (ch == 'q' || ch == 'Q') exit(0);
             else continue;
             printf("\n");
             
