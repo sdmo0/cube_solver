@@ -33,6 +33,7 @@
 #endif
 
 int must_connect = FALSE;
+int port_no = PORT_NO;
 
 char manString[MAX_STR];
 int subOptLev;
@@ -54,11 +55,10 @@ void error(const char *msg)
 
 int connect_control_server(void)
 {
-    int sockfd, portno;
+    int sockfd;
     struct sockaddr_in serv_addr;
     struct hostent *server;
 
-    portno = PORT_NO;
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
         error("ERROR opening socket");
@@ -74,14 +74,14 @@ int connect_control_server(void)
     bcopy((char *)server->h_addr,
           (char *)&serv_addr.sin_addr.s_addr,
           server->h_length);
-    serv_addr.sin_port = htons(portno);
+    serv_addr.sin_port = htons(port_no);
     
     if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) {
         error("ERROR connecting");
         if (must_connect) exit(0);
     }
 
-    printf("Success: Connecting to %s\n", SERVER);
+    printf("Success: Connecting to %s:%d\n", SERVER, port_no);
     return sockfd;        
 }
 
@@ -124,7 +124,11 @@ int main(int argc, char * argv[])
             
         } else if (argv[i][0]=='-') {
             if (argv[i][1]=='s') symRed=0;
-            else if (argv[i][1] == 'c') must_connect = TRUE;
+            else if (argv[i][1] == 'c') {
+                must_connect = TRUE;
+                int portno = atoi(argv[++i]);
+                if (portno > 0) port_no = portno;
+            }
             
         }
     }
