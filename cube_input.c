@@ -242,8 +242,10 @@ void init(void)
     status = 0;
 }
 
-#define MAX_M 100
-void mixing(int sockfd, int max)
+const int min_move = 5;
+const int max_move = 100;
+
+void mixing(int sockfd, int count)
 {
     char FACE[6] = {'U', 'L', 'F', 'R', 'B', 'D'};
     char buf[256];
@@ -252,8 +254,9 @@ void mixing(int sockfd, int max)
 
     int rotate;
     int idx = 0;
-    max = (MAX_M < max ? MAX_M : max);
-    for (i = 0; i < max; i++) {
+    count = (count < min_move ? min_move : count);
+    count = (count > max_move ? max_move : count);
+    for (i = 0; i < count; i++) {
         rotate = rand() % 6;
         buf[idx++] = FACE[rotate];
         rotate = rand();
@@ -308,11 +311,10 @@ int input_cube(int *sockfd, char *str, int n)
             else if (ch == 'x' || ch == 'X') {
                 printf("------------------------------------------------------\n");
                 if (*sockfd > 0) {
-                    printf("input mix movement count( x > 5 )\n");
+                    printf("input mix movement count( %d <= x <= %d)\n", min_move, max_move);
                     char buf[256];
                     scanf("%s", buf);
                     int count = atoi(buf);
-                    if (count < 5) count = 5;
                     mixing(*sockfd, count);
                 }
                 else printf("Not connected to Raspberry Pi\n");
