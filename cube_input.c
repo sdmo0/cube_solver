@@ -67,6 +67,8 @@ int status = 0;
 #define RIGHT 32
 #define CHECK_STATE(a, b) ((a) & (b) ? 'O' : 'X')
 
+int connect_control_server(int portno);
+
 void print_faces(void)
 {
     int i;
@@ -120,7 +122,8 @@ void print_menu(int status)
     printf("l(GREEN) : input LEFT => %c\n", CHECK_STATE(status, LEFT));
     printf("r(BLUE) : input RIGHT => %c\n", CHECK_STATE(status, RIGHT));
     printf("m(enu) : print menu\n");
-    printf("a : analyze\n");
+    printf("a : analyze\n\n");
+    printf("n : connect to Raspberry Pi\n");
     printf("x : mix the cube\n");
     printf("t : motor test\n");
     printf("q : exit\n");
@@ -248,21 +251,24 @@ void mixing(int sockfd, int max)
     srand(time(NULL));
 
     int rotate;
+    int idx = 0;
     max = (MAX_M < max ? MAX_M : max);
     for (i = 0; i < max; i++) {
         rotate = rand() % 6;
-        buf[i++] = FACE[rotate];
+        buf[idx++] = FACE[rotate];
         rotate = rand();
-        if (rotate & 0x1) buf[i++] = '\'';
-        buf[i] = ' ';
+        if (rotate & 0x1) buf[idx++] = '\'';
+        buf[idx++] = ' ';
     }
-    buf[max] = 0;
+    buf[idx] = 0;
 
-    int n = write(sockfd, buf, max);
+    printf("Generated mixing movements:\n");
+    printf("%s\n", buf);
+    int n = write(sockfd, buf, idx);
     if (n < 0) printf("ERROR writing(%s)\n", buf);
 }
 
-int input_cube(int sockfd, char *str, int n)
+int input_cube(int *sockfd, char *str, int n)
 {
     init();
     while (1) {
@@ -284,29 +290,47 @@ int input_cube(int sockfd, char *str, int n)
             else if (ch == 'l' || ch == 'L') face = LEFT;
             else if (ch == 'r' || ch == 'R') face = RIGHT;
             else if (ch == 'm' || ch == 'M') {print_menu(status); continue;}
-            else if (ch == 'a' || ch == 'A') request_analyze = 1;
+            else if (ch == 'n' || ch == 'N') {
+                printf("------------------------------------------------------\n");
+                printf("input port no: \n");
+                char buf[256];
+                scanf("%s", buf);
+                int portno = atoi(buf);
+                if (portno <= 0) portno = 51717;
+                if (*sockfd > 0) {
+                    printf("Closing socket(%d) for new connection\n", *sockfd);
+                    close(*sockfd);
+                }
+                *sockfd = connect_control_server(portno);
+                printf("------------------------------------------------------\n");
+                
+            } else if (ch == 'a' || ch == 'A') request_analyze = 1;
             else if (ch == 'x' || ch == 'X') {
-                if (sockfd > 0) {
-                    printf("input mix movement count\n");
+                printf("------------------------------------------------------\n");
+                if (*sockfd > 0) {
+                    printf("input mix movement count( x > 5 )\n");
                     char buf[256];
                     scanf("%s", buf);
                     int count = atoi(buf);
-                    if (count < 10) count = 10;
-                    mixing(sockfd, count);
+                    if (count < 5) count = 5;
+                    mixing(*sockfd, count);
                 }
                 else printf("Not connected to Raspberry Pi\n");
+                printf("------------------------------------------------------\n");
                 
             } else if (ch == 't' || ch == 'T') {
-                if (sockfd < 0) {
+                printf("------------------------------------------------------\n");
+                if (*sockfd < 0) {
                     printf("Not connected to Raspberry Pi\n");
                 } else {
                     printf("input movements such as <R U F' D ...>\n");
                     char buf[256];
                     scanf("%*[ \n\t\r]");
                     fgets(buf, 256, stdin);
-                    int n = write(sockfd, buf, strlen(buf));
+                    int n = write(*sockfd, buf, strlen(buf));
                     if (n < 0) printf("ERROR writing %s\n", buf);
                 }
+                printf("------------------------------------------------------\n");
                 
             } else if (ch == 'q' || ch == 'Q') exit(0);
             else continue;

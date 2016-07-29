@@ -33,7 +33,6 @@
 #endif
 
 int must_connect = FALSE;
-int port_no = PORT_NO;
 
 char manString[MAX_STR];
 int subOptLev;
@@ -45,7 +44,7 @@ static sigjmp_buf jump_buf;
 
 CubieCube cc_a;
 
-int input_cube(int sockfd, char *str, int n);
+int input_cube(int *sockfd, char *str, int n);
 
 void error(const char *msg)
 {
@@ -53,20 +52,23 @@ void error(const char *msg)
     if (must_connect) exit(0);
 }
 
-int connect_control_server(void)
+int connect_control_server(int port_no)
 {
     int sockfd;
     struct sockaddr_in serv_addr;
     struct hostent *server;
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0)
+    if (sockfd < 0) {
         error("ERROR opening socket");
+        return -1;
+    }
     server = gethostbyname(SERVER);
     
     if (server == NULL) {
         fprintf(stderr,"ERROR, no such host\n");
         if (must_connect) exit(0);
+        return -1;
     }
     
     bzero((char *) &serv_addr, sizeof(serv_addr));
@@ -79,9 +81,10 @@ int connect_control_server(void)
     if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) {
         error("ERROR connecting");
         if (must_connect) exit(0);
+        return -1;
+    } else {
+        printf("Success: Connecting to %s:%d\n", SERVER, port_no);
     }
-
-    printf("Success: Connecting to %s:%d\n", SERVER, port_no);
     return sockfd;        
 }
 
@@ -113,6 +116,9 @@ int main(int argc, char * argv[])
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 {
     int i,l;
+    int sockfd = -1;
+    int port_no = PORT_NO;
+
     subOptLev=-1;
     symRed=1;
     for (i=1;i<argc;i++)
@@ -125,16 +131,16 @@ int main(int argc, char * argv[])
         } else if (argv[i][0]=='-') {
             if (argv[i][1]=='s') symRed=0;
             else if (argv[i][1] == 'c') {
-                must_connect = TRUE;
-                int portno = atoi(argv[++i]);
+                //must_connect = TRUE;
+                int portno = -1;
+                if (argc >= ++i)
+                    portno = atoi(argv[i]);
                 if (portno > 0) port_no = portno;
+                sockfd = connect_control_server(port_no);
             }
             
         }
     }
-
-    int sockfd = -1;
-    if (must_connect) sockfd = connect_control_server();
 
     printf("initializing memory.\n");
     visitedA = (char *)calloc(NGOAL/8+1,1);//initialized to 0 by default
@@ -170,7 +176,7 @@ int main(int argc, char * argv[])
       if (manString[0]=='x') exit(EXIT_SUCCESS);
 */
 
-        input_cube(sockfd, manString, MAX_STR);
+        input_cube(&sockfd, manString, MAX_STR);
 
         time_t start_time = time(NULL);
     
