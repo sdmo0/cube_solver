@@ -297,15 +297,15 @@ int input_cube(int sockfd, char *str, int n)
                 else printf("Not connected to Raspberry Pi\n");
                 
             } else if (ch == 't' || ch == 'T') {
-                printf("input movements such as <R U F' D ...>\n");
-                char buf[256];
-                scanf("%*[ \n\t\r]");
-                fgets(buf, 256, stdin);
-                if (sockfd > 0) {
+                if (sockfd < 0) {
+                    printf("Not connected to Raspberry Pi\n");
+                } else {
+                    printf("input movements such as <R U F' D ...>\n");
+                    char buf[256];
+                    scanf("%*[ \n\t\r]");
+                    fgets(buf, 256, stdin);
                     int n = write(sockfd, buf, strlen(buf));
                     if (n < 0) printf("ERROR writing %s\n", buf);
-                } else {
-                    printf("ERROR invalid sockfd\n");
                 }
                 
             } else if (ch == 'q' || ch == 'Q') exit(0);
