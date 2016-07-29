@@ -240,7 +240,7 @@ void init(void)
 }
 
 #define MAX_M 100
-void mixing(int sockfd)
+void mixing(int sockfd, int max)
 {
     char FACE[6] = {'U', 'L', 'F', 'R', 'B', 'D'};
     char buf[256];
@@ -248,16 +248,17 @@ void mixing(int sockfd)
     srand(time(NULL));
 
     int rotate;
-    for (i = 0; i < MAX_M; i++) {
+    max = (MAX_M < max ? MAX_M : max);
+    for (i = 0; i < max; i++) {
         rotate = rand() % 6;
         buf[i++] = FACE[rotate];
         rotate = rand();
         if (rotate & 0x1) buf[i++] = '\'';
         buf[i] = ' ';
     }
-    buf[MAX_M] = 0;
+    buf[max] = 0;
 
-    int n = write(sockfd, buf, MAX_M);
+    int n = write(sockfd, buf, max);
     if (n < 0) printf("ERROR writing(%s)\n", buf);
 }
 
@@ -285,7 +286,14 @@ int input_cube(int sockfd, char *str, int n)
             else if (ch == 'm' || ch == 'M') {print_menu(status); continue;}
             else if (ch == 'a' || ch == 'A') request_analyze = 1;
             else if (ch == 'x' || ch == 'X') {
-                if (sockfd > 0) mixing(sockfd);
+                if (sockfd > 0) {
+                    printf("input mix movement count\n");
+                    char buf[256];
+                    scanf("%s", buf);
+                    int count = atoi(buf);
+                    if (count < 10) count = 10;
+                    mixing(sockfd, count);
+                }
                 else printf("Not connected to Raspberry Pi\n");
                 
             } else if (ch == 't' || ch == 'T') {
