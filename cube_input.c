@@ -295,7 +295,7 @@ int input_cube(int *sockfd, char *str, int n)
             else if (ch == 'm' || ch == 'M') {print_menu(status); continue;}
             else if (ch == 'n' || ch == 'N') {
                 printf("------------------------------------------------------\n");
-                printf("input port no: \n");
+                printf("input port no: ");
                 char buf[256];
                 scanf("%s", buf);
                 int portno = atoi(buf);
@@ -311,7 +311,7 @@ int input_cube(int *sockfd, char *str, int n)
             else if (ch == 'x' || ch == 'X') {
                 printf("------------------------------------------------------\n");
                 if (*sockfd > 0) {
-                    printf("input mix movement count( %d <= x <= %d)\n", min_move, max_move);
+                    printf("input mix movement count( %d <= x <= %d): ", min_move, max_move);
                     char buf[256];
                     scanf("%s", buf);
                     int count = atoi(buf);
@@ -325,7 +325,7 @@ int input_cube(int *sockfd, char *str, int n)
                 if (*sockfd < 0) {
                     printf("Not connected to Raspberry Pi\n");
                 } else {
-                    printf("input movements such as <R U F' D ...>\n");
+                    printf("input movements such as <R U F' D ...> : ");
                     char buf[256];
                     scanf("%*[ \n\t\r]");
                     fgets(buf, 256, stdin);
