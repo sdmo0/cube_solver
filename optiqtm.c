@@ -194,7 +194,7 @@ int main(int argc, char * argv[])
         }
         signal(SIGINT, SIG_IGN);
 #else
-        solveOptimal(cc_a);
+        solveOptimal(cc_a, sockfd);
 #endif
 
         time_t end_time = time(NULL);

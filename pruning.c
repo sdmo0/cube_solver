@@ -316,14 +316,14 @@ MOVE:
                 idx += snprintf(buffer + idx, 256 - idx, "%s ", mv[sn[b].move]);
             }
             int n = 0;
-            if (must_connect) {
+            //if (must_connect)
                 if (sockfd > 0) {
                     n = write(sockfd, buffer, strlen(buffer));
                     if (n < 0) error("ERROR writing to socket");
                 } else {
                     printf("Not connected to Raspberry Pi\n");
                 }
-            }
+
             printf(" (%uq*)\n",manLength);
             if (subOptLev==-1 ){printf("\n");return;}
         }
