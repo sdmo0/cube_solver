@@ -318,6 +318,10 @@ MOVE:
             int n = 0;
             //if (must_connect)
                 if (sockfd > 0) {
+
+                    printf("Press Enter key to move the motors...");
+                    getchar();
+
                     n = write(sockfd, buffer, strlen(buffer));
                     if (n < 0) error("ERROR writing to socket");
                 } else {
