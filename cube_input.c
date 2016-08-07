@@ -265,10 +265,12 @@ void mixing(int sockfd, int count)
     }
     buf[idx] = 0;
 
-    printf("Generated mixing movements:\n");
-    printf("%s\n", buf);
     int n = write(sockfd, buf, idx);
     if (n < 0) printf("ERROR writing(%s)\n", buf);
+    for (i = 0; i < idx; i++)
+        if (buf[i] == '\'') buf[i] = '3';
+    printf("Generated mixing movements:\n");
+    printf("%s\n", buf);
 }
 
 int input_cube(int *sockfd, char *str, int n)
