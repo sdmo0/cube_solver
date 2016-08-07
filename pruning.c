@@ -319,7 +319,7 @@ MOVE:
             //if (must_connect)
                 if (sockfd > 0) {
 
-                    printf("Press Enter key to move the motors...");
+                    printf("\nPress Enter key to move the motors...");
                     getchar();
 
                     n = write(sockfd, buffer, strlen(buffer));

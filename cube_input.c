@@ -122,6 +122,7 @@ void print_menu(int status)
     printf("l(GREEN) : input LEFT => %c\n", CHECK_STATE(status, LEFT));
     printf("r(BLUE) : input RIGHT => %c\n", CHECK_STATE(status, RIGHT));
     printf("m(enu) : print menu\n");
+    printf("i : input and analyze string notation for mixed cube\n");
     printf("a : analyze\n\n");
     printf("n : connect to Raspberry Pi\n");
     printf("x : mix the cube\n");
@@ -276,6 +277,8 @@ void mixing(int sockfd, int count)
 int input_cube(int *sockfd, char *str, int n)
 {
     init();
+    int request_analyze = 0;
+
     while (1) {
         print_menu(status);
 
@@ -284,7 +287,7 @@ int input_cube(int *sockfd, char *str, int n)
 
         int face = 0;
         char ch;
-        int request_analyze = 0;
+        request_analyze = 0;
         while (1) {
             printf("==> ");
             ch = getchar();
@@ -336,6 +339,12 @@ int input_cube(int *sockfd, char *str, int n)
                 }
                 printf("------------------------------------------------------\n");
                 
+            } else if (ch == 'i' || ch == 'I') {
+                printf("input string notation for mixed cube : ");
+                scanf("%*[ \n\t\r]");
+                fgets(str, 256, stdin);
+                request_analyze = 2;
+
             } else if (ch == 'q' || ch == 'Q') exit(0);
             else continue;
             printf("\n");
@@ -348,7 +357,9 @@ int input_cube(int *sockfd, char *str, int n)
         input_face(face);
     }
 
-    analyze(str, n);
+    if (request_analyze == 1)
+        analyze(str, n);
+
     printf("%s\n", str);
     return 0;
 }
