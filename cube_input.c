@@ -4,6 +4,8 @@
 #include <time.h>
 #include <unistd.h>
 
+int cfg_enter = 0;
+
 // UF UR UB UL DF DR DB DL FR FL BR BL UFR URB UBL ULF DRF DFL DLB DBR
 // WR WB WO WG YR YB YO YG RB RG OB OG WRB WBO WOG WGR YBR YRG YGO YOB
 
@@ -122,6 +124,7 @@ void print_menu(int status)
     printf("l(GREEN) : input LEFT => %c\n", CHECK_STATE(status, LEFT));
     printf("r(BLUE) : input RIGHT => %c\n", CHECK_STATE(status, RIGHT));
     printf("m(enu) : print menu\n");
+    printf("e : need enter for motor movements => %c\n", cfg_enter ? 'O' : 'X');
     printf("i : input and analyze string notation for mixed cube\n");
     printf("a : analyze\n\n");
     printf("n : connect to Raspberry Pi\n");
@@ -255,11 +258,16 @@ void mixing(int sockfd, int count)
 
     int rotate;
     int idx = 0;
+    int prev = rand() % 6;
     count = (count < min_move ? min_move : count);
     count = (count > max_move ? max_move : count);
     for (i = 0; i < count; i++) {
-        rotate = rand() % 6;
+        do {
+            rotate = rand() % 6;
+        } while (prev == rotate);
         buf[idx++] = FACE[rotate];
+        prev = rotate;
+        
         rotate = rand();
         if (rotate & 0x1) buf[idx++] = '\'';
         buf[idx++] = ' ';
@@ -311,6 +319,13 @@ int input_cube(int *sockfd, char *str, int n)
                 }
                 *sockfd = connect_control_server(portno);
                 printf("------------------------------------------------------\n");
+
+            } else if (ch == 'e' || ch == 'E') {
+                printf("input cfg for enter necessity (Current cfg: %c): ", cfg_enter ? 'O' : 'X');
+                scanf("%*[ \n\t\r]");
+                ch = getchar();
+                if (ch == 'O' || ch == 'o') cfg_enter = 1;
+                else if (ch == 'X' || ch == 'x') cfg_enter = 0;
                 
             } else if (ch == 'a' || ch == 'A') request_analyze = 1;
             else if (ch == 'x' || ch == 'X') {

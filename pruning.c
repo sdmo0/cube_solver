@@ -12,6 +12,8 @@ extern int subOptLev;
 extern int symRed;
 
 extern int must_connect;
+extern int cfg_enter;
+
 
 //movesDefault[m] gives the moves which are allowed after move m by default.
 //Each entry is a 12-bit array with the bit m* set if move m* is allowed
@@ -318,9 +320,10 @@ MOVE:
             int n = 0;
             //if (must_connect)
                 if (sockfd > 0) {
-
-                    printf("\nPress Enter key to move the motors...");
-                    getchar();
+                    if (cfg_enter) {
+                        printf("\nPress Enter key to move the motors...");
+                        getchar();
+                    }
 
                     n = write(sockfd, buffer, strlen(buffer));
                     if (n < 0) error("ERROR writing to socket");
